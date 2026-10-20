@@ -1,0 +1,43 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: slack
+  group_by: [alertname]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+  routes:
+    # Critical alerts repeat more often
+    - matchers: ['severity="critical"']
+      receiver: slack
+      repeat_interval: 1h
+
+receivers:
+  - name: slack
+    slack_configs:
+      # Webhook URL is read from the mounted Secret (see alertmanager-secret.yaml)
+      - api_url_file: /etc/alertmanager/secrets/slack-webhook-url
+        channel: "#meeting-alerts"
+        send_resolved: true
+        title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}*{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # Optional e-mail receiver: uncomment, add it to a route and fill in the secret.
+  # - name: email
+  #   email_configs:
+  #     - to: you@example.com
+  #       from: alertmanager@example.com
+  #       smarthost: smtp.gmail.com:587
+  #       auth_username: you@example.com
+  #       auth_password_file: /etc/alertmanager/secrets/smtp-password
+  #       send_resolved: true
+
+inhibit_rules:
+  # If the app is down, suppress its warning-level alerts
+  - source_matchers: ['alertname="MeetingCheckerDown"']
+    target_matchers: ['severity="warning"']
+    equal: []

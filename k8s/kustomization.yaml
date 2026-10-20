@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: meeting-checker
+
+# Infrastructure as Code: one command deploys the whole stack:
+#   kubectl apply -k k8s/
+resources:
+  - namespace.yaml
+  - app.yaml
+  - prometheus/prometheus.yaml
+  - alertmanager/alertmanager.yaml
+  - alertmanager/alertmanager-secret.yaml
+  - grafana/grafana.yaml
+
+configMapGenerator:
+  - name: prometheus-config
+    files: [prometheus/prometheus.yml]
+  - name: prometheus-rules
+    files: [prometheus/alert-rules.yml]
+  - name: alertmanager-config
+    files: [alertmanager/alertmanager.yml]
+  - name: grafana-datasource
+    files: [grafana/datasource.yml]
+  - name: grafana-dashboard-provider
+    files: [grafana/dashboard-provider.yml]
+  - name: grafana-dashboards
+    files: [grafana/dashboards/meeting-checker.json]

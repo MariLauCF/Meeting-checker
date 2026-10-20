@@ -1,0 +1,94 @@
+{
+  "title": "Meeting Checker",
+  "uid": "meeting-checker",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Upcoming meetings",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "meetings_total" }]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Missing room",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "meetings_missing_room" }],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 3 } ] } }, "overrides": [] },
+      "options": { "colorMode": "background" }
+    },
+    {
+      "id": 3, "type": "stat", "title": "No room & starting < 24h",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "meetings_urgent_missing_room" }],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "colorMode": "background" }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Meetings with pending RSVPs",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "meetings_missing_rsvp" }],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "orange", "value": 1 } ] } }, "overrides": [] },
+      "options": { "colorMode": "background" }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Attendees not responded",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "attendees_pending_rsvp" }]
+    },
+    {
+      "id": 6, "type": "stat", "title": "Check errors (1h)",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "increase(meeting_checker_errors_total[1h])" }],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "colorMode": "background" }
+    },
+    {
+      "id": 7, "type": "piechart", "title": "Room status",
+      "gridPos": { "x": 0, "y": 4, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "meetings_with_room", "legendFormat": "Room assigned" },
+        { "refId": "B", "expr": "meetings_missing_room", "legendFormat": "No room" },
+        { "refId": "C", "expr": "meetings_online", "legendFormat": "Online (no room needed)" }
+      ]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Missing room / RSVP over time",
+      "gridPos": { "x": 8, "y": 4, "w": 16, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "meetings_missing_room", "legendFormat": "Missing room" },
+        { "refId": "B", "expr": "meetings_missing_rsvp", "legendFormat": "Missing RSVPs" },
+        { "refId": "C", "expr": "meetings_urgent_missing_room", "legendFormat": "Urgent: no room <24h" }
+      ]
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "Seconds since last successful check",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "time() - meeting_checker_last_success_timestamp_seconds", "legendFormat": "age" }]
+    },
+    {
+      "id": 10, "type": "stat", "title": "Exporter up",
+      "gridPos": { "x": 12, "y": 12, "w": 4, "h": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "up{job=\"meeting-checker\"}" }],
+      "fieldConfig": { "defaults": {
+        "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+        "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] } }, "overrides": [] },
+      "options": { "colorMode": "background" }
+    }
+  ]
+}

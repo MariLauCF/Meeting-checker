@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meeting-checker
+  labels:
+    app: meeting-checker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meeting-checker
+  template:
+    metadata:
+      labels:
+        app: meeting-checker
+      annotations:
+        # Picked up by Prometheus Kubernetes service discovery
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: meeting-checker
+          image: meeting-checker:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 8000
+          env:
+            - { name: CHECK_INTERVAL, value: "30" }
+            - { name: LOOKAHEAD_DAYS, value: "7" }
+            - { name: URGENT_HOURS,   value: "24" }
+          readinessProbe:
+            httpGet: { path: /metrics, port: metrics }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /metrics, port: metrics }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits:   { cpu: 100m, memory: 64Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: meeting-checker
+  labels:
+    app: meeting-checker
+spec:
+  selector:
+    app: meeting-checker
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics

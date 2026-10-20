@@ -1,0 +1,48 @@
+groups:
+  - name: meeting-checker
+    rules:
+      - alert: MeetingCheckerDown
+        expr: up{job="meeting-checker"} == 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: "Meeting Checker is down"
+          description: "Prometheus cannot scrape {{ $labels.instance }} for more than 1 minute."
+
+      - alert: MeetingCheckerCalendarErrors
+        expr: increase(meeting_checker_errors_total[5m]) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: "Calendar checks are failing"
+          description: "{{ $value }} failed calendar checks in the last 5 minutes."
+
+      - alert: MeetingCheckerStale
+        expr: time() - meeting_checker_last_success_timestamp_seconds > 300
+        labels: { severity: warning }
+        annotations:
+          summary: "No successful calendar check for 5 minutes"
+          description: "The calendar data shown in dashboards may be outdated."
+
+      - alert: MeetingStartingSoonWithoutRoom
+        expr: meetings_urgent_missing_room > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $value }} meeting(s) start within 24h with NO room"
+          description: "Book a room now - in-person meetings starting soon have no room assigned."
+
+      - alert: MeetingsMissingRoom
+        expr: meetings_missing_room > 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $value }} upcoming meeting(s) have no room assigned"
+          description: "In-person meetings in the look-ahead window are missing a room."
+
+      - alert: ManyPendingRSVPs
+        expr: attendees_pending_rsvp > 5
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $value }} attendees have not responded to invitations"
+          description: "Too many pending RSVPs across upcoming meetings."

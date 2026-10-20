@@ -1,0 +1,16 @@
+{
+  "meetings": [
+    {"id": "m1", "subject": "Sprint Planning", "starts_in_hours": 3, "organizer": "alice", "room": "Room A",
+     "attendees": [{"name": "bob", "response": "accepted"}, {"name": "carol", "response": "accepted"}]},
+    {"id": "m2", "subject": "Customer QBR", "starts_in_hours": 5, "organizer": "alice", "room": "",
+     "attendees": [{"name": "dave", "response": "accepted"}, {"name": "erin", "response": "none"}]},
+    {"id": "m3", "subject": "Architecture Review", "starts_in_hours": 30, "organizer": "bob", "room": "Room C",
+     "attendees": [{"name": "alice", "response": "none"}, {"name": "carol", "response": "none"}, {"name": "dave", "response": "tentative"}]},
+    {"id": "m4", "subject": "Team Offsite Planning", "starts_in_hours": 52, "organizer": "carol", "room": "",
+     "attendees": [{"name": "alice", "response": "accepted"}]},
+    {"id": "m5", "subject": "Daily Standup (Teams)", "starts_in_hours": 20, "organizer": "dave", "room": "", "is_online": true,
+     "attendees": [{"name": "alice", "response": "accepted"}, {"name": "bob", "response": "declined"}]},
+    {"id": "m6", "subject": "Quarterly All-Hands", "starts_in_hours": 72, "organizer": "erin", "room": "Auditorium",
+     "attendees": [{"name": "alice", "response": "none"}, {"name": "bob", "response": "none"}, {"name": "carol", "response": "none"}]}
+  ]
+}

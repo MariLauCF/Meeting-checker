@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  labels: { app: alertmanager }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: alertmanager }
+  template:
+    metadata:
+      labels: { app: alertmanager }
+    spec:
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:v0.27.0
+          args:
+            - --config.file=/etc/alertmanager/alertmanager.yml
+            - --storage.path=/alertmanager
+          ports:
+            - { name: web, containerPort: 9093 }
+          readinessProbe:
+            httpGet: { path: /-/ready, port: web }
+          livenessProbe:
+            httpGet: { path: /-/healthy, port: web }
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits:   { cpu: 100m, memory: 128Mi }
+          volumeMounts:
+            - { name: config,  mountPath: /etc/alertmanager/alertmanager.yml, subPath: alertmanager.yml }
+            - { name: secrets, mountPath: /etc/alertmanager/secrets, readOnly: true }
+            - { name: data,    mountPath: /alertmanager }
+      volumes:
+        - name: config
+          configMap: { name: alertmanager-config }
+        - name: secrets
+          secret: { secretName: alertmanager-secrets }
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+spec:
+  selector: { app: alertmanager }
+  ports:
+    - { name: web, port: 9093, targetPort: web }
